@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BookApi.Dtos;
+using BookApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookApi.Controllers;
@@ -8,16 +10,42 @@ namespace BookApi.Controllers;
 [Authorize]
 
 public class BooksController : ControllerBase
-{
+{ 
+    private static readonly List<Book> Books =
+    [
+        new Book
+        {
+            Id = 1,
+            Title = "Clean Code",
+            Author = "Robert C. Martin",
+            Isbn = "9780132350884",
+            Price = 29.99m,
+            StockQuantity = 10,
+            PublishedDate = new DateTime(2008, 8, 1)
+        }
+    ];
     [HttpGet]
     public IActionResult GetBooks()
     {
-        var books = new[]
+        return Ok(Books);
+    }
+
+    [HttpPost]
+    public IActionResult CreateBook(CreateBookRequest request)
+    {
+        var book = new Book
         {
-            new { Id = 1, Title = "Clean Code", Author = "Robert C. Martin" },
-            new { Id = 2, Title = "Atomic Habits", Author = "James Clear" }
+            Id = Books.Count + 1,
+            Title = request.Title,
+            Author = request.Author,
+            Isbn = request.Isbn,
+            Price = request.Price,
+            StockQuantity = request.StockQuantity,
+            PublishedDate = request.PublishedDate
         };
 
-        return Ok(books);
+        Books.Add(book);
+
+        return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
     }
 }
