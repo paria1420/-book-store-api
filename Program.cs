@@ -1,5 +1,7 @@
+using BookApi.Data;
 using BookApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -38,6 +40,10 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddDbContext<BookStoreDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 builder.Services.AddSingleton<IBookService, BookService>();
 
 var app = builder.Build();
