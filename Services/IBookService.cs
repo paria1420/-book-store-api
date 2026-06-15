@@ -10,4 +10,5 @@ public interface IBookService
     Task<Book> Create(CreateBookRequest request);
 
     Task<List<Book>> Search(string? searchTerm);
+    Task<Book?> GetByIdAsync(int id);
 }

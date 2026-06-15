@@ -26,6 +26,19 @@ public class BooksController : ControllerBase
         var books = await _bookService.GetAll();
         return Ok(books);
     }
+    
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetBook(int id)
+    {
+        var book = await _bookService.GetByIdAsync(id);
+
+        if (book is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(book);
+    }
 
     [HttpPost]
     public async Task<IActionResult> CreateBook(CreateBookRequest request)

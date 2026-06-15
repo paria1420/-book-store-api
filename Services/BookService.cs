@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore;
 namespace BookApi.Services;
 
 public class BookService : IBookService
-{private readonly BookStoreDbContext _context;
+{
+    private readonly BookStoreDbContext _context;
 
     public BookService(BookStoreDbContext context)
     {
         _context = context;
     }
 
-    public async  Task<List<Book>> GetAll()
+    public async Task<List<Book>> GetAll()
     {
         return await _context.Books
             .AsNoTracking()
@@ -38,7 +39,7 @@ public class BookService : IBookService
         return book;
     }
 
-    public async  Task<List<Book>> Search(string? searchTerm)
+    public async Task<List<Book>> Search(string? searchTerm)
     {
         var query = _context.Books
             .AsNoTracking()
@@ -53,5 +54,12 @@ public class BookService : IBookService
         }
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Book?> GetByIdAsync(int id)
+    {
+        return await _context.Books
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 }
