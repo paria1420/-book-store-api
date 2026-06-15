@@ -1,34 +1,29 @@
-﻿using BookApi.Dtos;
+﻿using BookApi.Data;
+using BookApi.Dtos;
 using BookApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookApi.Services;
 
 public class BookService : IBookService
-{
-    private static readonly List<Book> Books =
-    [
-        new Book
-        {
-            Id = 1,
-            Title = "Clean Code",
-            Author = "Robert C. Martin",
-            Isbn = "9780132350884",
-            Price = 29.99m,
-            StockQuantity = 10,
-            PublishedDate = new DateTime(2008, 8, 1)
-        }
-    ];
+{private readonly BookStoreDbContext _context;
 
-    public List<Book> GetAll()
+    public BookService(BookStoreDbContext context)
     {
-        return Books;
+        _context = context;
     }
 
-    public Book Create(CreateBookRequest request)
+    public async  Task<List<Book>> GetAll()
+    {
+        return await _context.Books
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<Book> Create(CreateBookRequest request)
     {
         var book = new Book
         {
-            Id = Books.Count + 1,
             Title = request.Title,
             Author = request.Author,
             Isbn = request.Isbn,
@@ -37,23 +32,26 @@ public class BookService : IBookService
             PublishedDate = request.PublishedDate
         };
 
-        Books.Add(book);
+        _context.Books.Add(book);
+        await _context.SaveChangesAsync();
 
         return book;
     }
 
-    public List<Book> Search(string? searchTerm)
+    public async  Task<List<Book>> Search(string? searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        var query = _context.Books
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            return Books;
+            query = query.Where(x =>
+                x.Title.Contains(searchTerm) ||
+                x.Author.Contains(searchTerm) ||
+                x.Isbn.Contains(searchTerm));
         }
 
-        return Books
-            .Where(x =>
-                x.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                x.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                x.Isbn.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        return await query.ToListAsync();
     }
 }

@@ -5,9 +5,9 @@ namespace BookApi.Services;
 
 public interface IBookService
 {
-    List<Book> GetAll();
+    Task<List<Book>> GetAll();
 
-    Book Create(CreateBookRequest request);
+    Task<Book> Create(CreateBookRequest request);
 
-    List<Book> Search(string? searchTerm);
+    Task<List<Book>> Search(string? searchTerm);
 }

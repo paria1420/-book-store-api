@@ -21,23 +21,23 @@ public class BooksController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult GetBooks()
+    public async Task<IActionResult> GetBooks()
     {
-        var books = _bookService.GetAll();
+        var books = await _bookService.GetAll();
         return Ok(books);
     }
 
     [HttpPost]
-    public IActionResult CreateBook(CreateBookRequest request)
+    public async Task<IActionResult> CreateBook(CreateBookRequest request)
     {
-        var book = _bookService.Create(request);
+        var book = await _bookService.Create(request);
         return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
     }
 
     [HttpGet("search")]
-    public IActionResult SearchBooks([FromQuery] string? searchTerm)
+    public async Task<IActionResult> SearchBooks([FromQuery] string? searchTerm)
     {
-        var books = _bookService.Search(searchTerm);
+        var books = await _bookService.Search(searchTerm);
 
         return Ok(books);
     }
