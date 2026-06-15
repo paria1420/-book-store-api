@@ -14,11 +14,15 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task<List<BookResponse>> GetAll(GetBooksRequest request)
+    public async Task<PagedResult<BookResponse>> GetAll(GetBooksRequest request)
     {
+        var query = _context.Books
+            .AsNoTracking();
 
-        return await _context.Books
-            .AsNoTracking()
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(x => x.Id)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(book => new BookResponse
@@ -32,6 +36,14 @@ public class BookService : IBookService
                 PublishedDate = book.PublishedDate
             })
             .ToListAsync();
+
+        return new PagedResult<BookResponse>
+        {
+            Items = items,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<BookResponse> Create(CreateBookRequest request)
@@ -52,18 +64,18 @@ public class BookService : IBookService
         return MapToResponse(book);
     }
 
-    public async Task<List<BookResponse>> Search(SearchBooksRequest request)
+    public async Task<PagedResult<BookResponse>> Search(SearchBooksRequest request)
     {
         var query = _context.Books
             .AsNoTracking()
             .AsQueryable();
-        var searchTerm = request.SearchTerm?.Trim();
-        if (!string.IsNullOrWhiteSpace(searchTerm))
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             query = query.Where(x =>
-                x.Title.Contains(searchTerm) ||
-                x.Author.Contains(searchTerm) ||
-                x.Isbn.Contains(searchTerm));
+                x.Title.Contains(request.SearchTerm) ||
+                x.Author.Contains(request.SearchTerm) ||
+                x.Isbn.Contains(request.SearchTerm));
         }
 
         if (request.MinPrice.HasValue)
@@ -76,7 +88,10 @@ public class BookService : IBookService
             query = query.Where(x => x.Price <= request.MaxPrice.Value);
         }
 
-        return await query.OrderBy(x => x.Id)
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(x => x.Id)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(book => new BookResponse
@@ -90,6 +105,14 @@ public class BookService : IBookService
                 PublishedDate = book.PublishedDate
             })
             .ToListAsync();
+
+        return new PagedResult<BookResponse>
+        {
+            Items = items,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<BookResponse?> GetByIdAsync(int id)
