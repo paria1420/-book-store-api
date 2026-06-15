@@ -17,5 +17,9 @@ public class BookStoreDbContext : DbContext
         modelBuilder.Entity<Book>()
             .Property(x => x.Price)
             .HasPrecision(18, 2);
+        
+        modelBuilder.Entity<Book>()
+            .HasIndex(x => x.Isbn)
+            .IsUnique();
     }
 }
