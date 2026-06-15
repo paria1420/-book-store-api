@@ -46,7 +46,7 @@ public class BookService : IBookService
         };
     }
 
-    public async Task<BookResponse> Create(CreateBookRequest request)
+    public async Task<BookResponse> CreateAsync(CreateBookRequest request)
     {
         var book = new Book
         {
@@ -57,7 +57,13 @@ public class BookService : IBookService
             StockQuantity = request.StockQuantity,
             PublishedDate = request.PublishedDate
         };
+        var isbnExists = await _context.Books
+            .AnyAsync(x => x.Isbn == request.Isbn);
 
+        if (isbnExists)
+        {
+            throw new InvalidOperationException("A book with this ISBN already exists.");
+        }
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
 

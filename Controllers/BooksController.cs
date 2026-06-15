@@ -67,8 +67,18 @@ public class BooksController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBook(CreateBookRequest request)
     {
-        var book = await _bookService.Create(request);
-        return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
+        try
+        {
+            var book = await _bookService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                message = ex.Message
+            });
+        }
     }
 
     [HttpGet("search")]
