@@ -54,14 +54,24 @@ public class BooksController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateBook(int id, UpdateBookRequest request)
     {
-        var book = await _bookService.UpdateAsync(id, request);
-
-        if (book is null)
+        try
         {
-            return NotFound();
-        }
+            var book = await _bookService.UpdateAsync(id, request);
 
-        return Ok(book);
+            if (book is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(book);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                message = ex.Message
+            });
+        }
     }
 
     [HttpPost]

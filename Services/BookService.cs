@@ -154,6 +154,14 @@ public class BookService : IBookService
             return null;
         }
 
+        var isbnExists = await _context.Books
+            .AnyAsync(x => x.Id != id && x.Isbn == request.Isbn);
+
+        if (isbnExists)
+        {
+            throw new InvalidOperationException("A book with this ISBN already exists.");
+        }
+
         book.Title = request.Title;
         book.Author = request.Author;
         book.Isbn = request.Isbn;
