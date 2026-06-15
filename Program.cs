@@ -44,7 +44,7 @@ builder.Services.AddDbContext<BookStoreDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddSingleton<IBookService, BookService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 var app = builder.Build();
 
