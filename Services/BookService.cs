@@ -52,12 +52,12 @@ public class BookService : IBookService
         return MapToResponse(book);
     }
 
-    public async Task<List<BookResponse>> Search(string? searchTerm)
+    public async Task<List<BookResponse>> Search(SearchBooksRequest request)
     {
         var query = _context.Books
             .AsNoTracking()
             .AsQueryable();
-
+        var searchTerm = request.SearchTerm?.Trim();
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(x =>
@@ -66,7 +66,19 @@ public class BookService : IBookService
                 x.Isbn.Contains(searchTerm));
         }
 
-        return await query
+        if (request.MinPrice.HasValue)
+        {
+            query = query.Where(x => x.Price >= request.MinPrice.Value);
+        }
+
+        if (request.MaxPrice.HasValue)
+        {
+            query = query.Where(x => x.Price <= request.MaxPrice.Value);
+        }
+
+        return await query.OrderBy(x => x.Id)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
             .Select(book => new BookResponse
             {
                 Id = book.Id,
