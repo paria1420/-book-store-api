@@ -1,5 +1,6 @@
 ﻿using BookApi.Data;
 using BookApi.Dtos;
+using BookApi.Exceptions;
 using BookApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,8 +63,9 @@ public class BookService : IBookService
 
         if (isbnExists)
         {
-            throw new InvalidOperationException("A book with this ISBN already exists.");
+            throw new DuplicateBookIsbnException(request.Isbn);
         }
+
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
 
@@ -159,8 +161,9 @@ public class BookService : IBookService
 
         if (isbnExists)
         {
-            throw new InvalidOperationException("A book with this ISBN already exists.");
+            throw new DuplicateBookIsbnException(request.Isbn);
         }
+
 
         book.Title = request.Title;
         book.Author = request.Author;
