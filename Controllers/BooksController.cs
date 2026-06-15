@@ -39,6 +39,18 @@ public class BooksController : ControllerBase
 
         return Ok(book);
     }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteBook(int id)
+    {
+        var deleted = await _bookService.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
 
     [HttpPost]
     public async Task<IActionResult> CreateBook(CreateBookRequest request)

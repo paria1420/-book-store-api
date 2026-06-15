@@ -62,4 +62,19 @@ public class BookService : IBookService
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var book = await _context.Books.FindAsync(id);
+
+        if (book is null)
+        {
+            return false;
+        }
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 }

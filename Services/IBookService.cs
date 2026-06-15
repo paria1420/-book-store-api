@@ -11,4 +11,5 @@ public interface IBookService
 
     Task<List<Book>> Search(string? searchTerm);
     Task<Book?> GetByIdAsync(int id);
+    Task<bool> DeleteAsync(int id);
 }
