@@ -5,7 +5,7 @@ namespace BookApi.Services;
 
 public interface IBookService
 {
-    Task<List<BookResponse>> GetAll();
+    Task<List<BookResponse>> GetAll(GetBooksRequest request);
     Task<BookResponse> Create(CreateBookRequest request);
     Task<List<BookResponse>> Search(string? searchTerm);
     Task<BookResponse?> GetByIdAsync(int id);

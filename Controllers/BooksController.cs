@@ -21,9 +21,9 @@ public class BooksController : ControllerBase
 
 
     [HttpGet]
-    public async Task<IActionResult> GetBooks()
+    public async Task<IActionResult> GetBooks([FromQuery] GetBooksRequest request)
     {
-        var books = await _bookService.GetAll();
+        var books = await _bookService.GetAll(request);
         return Ok(books);
     }
     

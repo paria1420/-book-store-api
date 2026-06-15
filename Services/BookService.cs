@@ -14,11 +14,13 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task<List<BookResponse>> GetAll()
+    public async Task<List<BookResponse>> GetAll(GetBooksRequest request)
     {
 
         return await _context.Books
             .AsNoTracking()
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
             .Select(book => new BookResponse
             {
                 Id = book.Id,
