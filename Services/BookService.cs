@@ -14,14 +14,25 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task<List<Book>> GetAll()
+    public async Task<List<BookResponse>> GetAll()
     {
+
         return await _context.Books
             .AsNoTracking()
+            .Select(book => new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                Isbn = book.Isbn,
+                Price = book.Price,
+                StockQuantity = book.StockQuantity,
+                PublishedDate = book.PublishedDate
+            })
             .ToListAsync();
     }
 
-    public async Task<Book> Create(CreateBookRequest request)
+    public async Task<BookResponse> Create(CreateBookRequest request)
     {
         var book = new Book
         {
@@ -36,10 +47,10 @@ public class BookService : IBookService
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
 
-        return book;
+        return MapToResponse(book);
     }
 
-    public async Task<List<Book>> Search(string? searchTerm)
+    public async Task<List<BookResponse>> Search(string? searchTerm)
     {
         var query = _context.Books
             .AsNoTracking()
@@ -53,14 +64,27 @@ public class BookService : IBookService
                 x.Isbn.Contains(searchTerm));
         }
 
-        return await query.ToListAsync();
+        return await query
+            .Select(book => new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                Isbn = book.Isbn,
+                Price = book.Price,
+                StockQuantity = book.StockQuantity,
+                PublishedDate = book.PublishedDate
+            })
+            .ToListAsync();
     }
 
-    public async Task<Book?> GetByIdAsync(int id)
+    public async Task<BookResponse?> GetByIdAsync(int id)
     {
-        return await _context.Books
+        var book = await _context.Books
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
+
+        return book is null ? null : MapToResponse(book);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -78,7 +102,7 @@ public class BookService : IBookService
         return true;
     }
 
-    public async Task<Book?> UpdateAsync(int id, UpdateBookRequest request)
+    public async Task<BookResponse?> UpdateAsync(int id, UpdateBookRequest request)
     {
         var book = await _context.Books.FindAsync(id);
 
@@ -95,6 +119,21 @@ public class BookService : IBookService
         book.PublishedDate = request.PublishedDate;
 
         await _context.SaveChangesAsync();
-        return book;
+
+        return MapToResponse(book);
+    }
+
+    private static BookResponse MapToResponse(Book book)
+    {
+        return new BookResponse
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Author = book.Author,
+            Isbn = book.Isbn,
+            Price = book.Price,
+            StockQuantity = book.StockQuantity,
+            PublishedDate = book.PublishedDate
+        };
     }
 }
