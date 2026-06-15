@@ -77,4 +77,24 @@ public class BookService : IBookService
 
         return true;
     }
+
+    public async Task<Book?> UpdateAsync(int id, UpdateBookRequest request)
+    {
+        var book = await _context.Books.FindAsync(id);
+
+        if (book is null)
+        {
+            return null;
+        }
+
+        book.Title = request.Title;
+        book.Author = request.Author;
+        book.Isbn = request.Isbn;
+        book.Price = request.Price;
+        book.StockQuantity = request.StockQuantity;
+        book.PublishedDate = request.PublishedDate;
+
+        await _context.SaveChangesAsync();
+        return book;
+    }
 }

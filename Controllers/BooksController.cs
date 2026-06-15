@@ -51,6 +51,18 @@ public class BooksController : ControllerBase
 
         return NoContent();
     }
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateBook(int id, UpdateBookRequest request)
+    {
+        var book = await _bookService.UpdateAsync(id, request);
+
+        if (book is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(book);
+    }
 
     [HttpPost]
     public async Task<IActionResult> CreateBook(CreateBookRequest request)
