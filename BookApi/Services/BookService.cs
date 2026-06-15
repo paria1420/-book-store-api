@@ -15,7 +15,7 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task<PagedResult<BookResponse>> GetAll(GetBooksRequest request)
+    public async Task<PagedResult<BookResponse>> GetAllAsync(GetBooksRequest request)
     {
         var query = _context.Books
             .AsNoTracking();
@@ -72,7 +72,7 @@ public class BookService : IBookService
         return MapToResponse(book);
     }
 
-    public async Task<PagedResult<BookResponse>> Search(SearchBooksRequest request)
+    public async Task<PagedResult<BookResponse>> SearchAsync(SearchBooksRequest request)
     {
         var query = _context.Books
             .AsNoTracking()
@@ -175,6 +175,71 @@ public class BookService : IBookService
         await _context.SaveChangesAsync();
 
         return MapToResponse(book);
+    }
+
+    public async Task<int> SeedRandomBooksAsync(int count)
+    {
+        if (count <= 0)
+        {
+            count = 100;
+        }
+
+        if (count > 5000)
+        {
+            count = 5000;
+        }
+
+        var random = new Random();
+
+        var titles = new[]
+        {
+            "Clean Code",
+            "The Pragmatic Programmer",
+            "Design Patterns",
+            "Refactoring",
+            "Domain-Driven Design",
+            "Atomic Habits",
+            "Deep Work",
+            "The Clean Coder",
+            "Code Complete",
+            "Working Effectively with Legacy Code"
+        };
+
+        var authors = new[]
+        {
+            "Robert C. Martin",
+            "Martin Fowler",
+            "Kent Beck",
+            "Eric Evans",
+            "James Clear",
+            "Cal Newport",
+            "Andrew Hunt",
+            "David Thomas",
+            "Steve McConnell",
+            "Michael Feathers"
+        };
+
+        var books = Enumerable.Range(1, count)
+            .Select(i =>
+            {
+                var uniquePart = Guid.NewGuid().ToString("N")[..8];
+
+                return new Book
+                {
+                    Title = $"{titles[random.Next(titles.Length)]} {uniquePart}",
+                    Author = authors[random.Next(authors.Length)],
+                    Isbn = $"ISBN-{DateTime.UtcNow:yyyyMMddHHmmss}-{uniquePart}",
+                    Price = Math.Round((decimal)(random.NextDouble() * 90 + 5), 2),
+                    StockQuantity = random.Next(0, 200),
+                    PublishedDate = DateTime.UtcNow.AddDays(-random.Next(0, 5000))
+                };
+            })
+            .ToList();
+
+        await _context.Books.AddRangeAsync(books);
+        await _context.SaveChangesAsync();
+
+        return books.Count;
     }
 
     private static BookResponse MapToResponse(Book book)

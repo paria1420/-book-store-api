@@ -23,7 +23,7 @@ public class BooksController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetBooks([FromQuery] GetBooksRequest request)
     {
-        var books = await _bookService.GetAll(request);
+        var books = await _bookService.GetAllAsync(request);
         return Ok(books);
     }
 
@@ -77,8 +77,18 @@ public class BooksController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> SearchBooks([FromQuery] SearchBooksRequest request)
     {
-        var books = await _bookService.Search(request);
+        var books = await _bookService.SearchAsync(request);
 
         return Ok(books);
+    }
+    [HttpPost("seed")]
+    public async Task<IActionResult> SeedBooks([FromQuery] int count = 1000)
+    {
+        var createdCount = await _bookService.SeedRandomBooksAsync(count);
+
+        return Ok(new
+        {
+            message = $"{createdCount} random books created."
+        });
     }
 }
