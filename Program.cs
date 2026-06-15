@@ -1,4 +1,5 @@
 using BookApi.Data;
+using BookApi.Middleware;
 using BookApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 // For now, comment this if HTTPS gives warning
 // app.UseHttpsRedirection();
 

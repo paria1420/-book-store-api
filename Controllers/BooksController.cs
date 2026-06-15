@@ -26,7 +26,7 @@ public class BooksController : ControllerBase
         var books = await _bookService.GetAll(request);
         return Ok(books);
     }
-    
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetBook(int id)
     {
@@ -39,6 +39,7 @@ public class BooksController : ControllerBase
 
         return Ok(book);
     }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteBook(int id)
     {
@@ -51,44 +52,26 @@ public class BooksController : ControllerBase
 
         return NoContent();
     }
+
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateBook(int id, UpdateBookRequest request)
     {
-        try
-        {
-            var book = await _bookService.UpdateAsync(id, request);
+        var book = await _bookService.UpdateAsync(id, request);
 
-            if (book is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(book);
-        }
-        catch (InvalidOperationException ex)
+        if (book is null)
         {
-            return Conflict(new
-            {
-                message = ex.Message
-            });
+            return NotFound();
         }
+
+        return Ok(book);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateBook(CreateBookRequest request)
     {
-        try
-        {
-            var book = await _bookService.CreateAsync(request);
-            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new
-            {
-                message = ex.Message
-            });
-        }
+        var book = await _bookService.CreateAsync(request);
+
+        return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
     }
 
     [HttpGet("search")]
